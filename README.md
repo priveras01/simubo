@@ -1,2 +1,2 @@
-# simuvid
-Simulador + COVID = SIMUVID
+# simubo
+Simulador + cubo = SIMUBO
