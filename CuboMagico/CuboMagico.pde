@@ -20,6 +20,25 @@
 import peasy.*;
 PeasyCam cam;
 
+Mover moverAtual;
+Mover[] movimentos = new Mover[] {
+  new Mover(0, 1, 0, 1),
+  new Mover(0, 1, 0, -1),
+  new Mover(0, -1, 0, 1),
+  new Mover(0, -1, 0, -1),
+  new Mover(1, 0, 0, 1),
+  new Mover(1, 0, 0, -1),
+  new Mover(-1, 0, 0, 1),
+  new Mover(-1, 0, 0, -1),
+  new Mover(0, 0, 1, 1),
+  new Mover(0, 0, 1, -1),
+  new Mover(0, 0, -1, 1),
+  new Mover(0, 0, -1, -1)
+};
+
+ArrayList<Mover> sequencia = new ArrayList<Mover>();
+int contador = 0;
+
 /**
 *  Instancia o cubo com dimensões 3*3*3
 **/
@@ -42,6 +61,21 @@ void setup() {
       }
     }
   }
+  
+  for (int i = 0; i < 25; i++){
+    int a = int(random(movimentos.length));
+    Mover m = movimentos[a];
+    sequencia.add(m);
+  }
+  
+  moverAtual = sequencia.get(contador);
+  
+  for (int i = sequencia.size()-1; i >= 0; i--){
+    Mover proximoMover = sequencia.get(i).copiar();
+    proximoMover.inverter();
+    sequencia.add(proximoMover);
+  }
+  
 }
 
 /**
@@ -83,6 +117,9 @@ void keyPressed() {
   switch(key) {
     // minúsculo na ordem horária
     // maiúsculo na ordem anti-horária
+    case ' ': 
+      moverAtual.iniciar();
+      break;
     case 't': // trás
       vira('z', -1, -1);
       break;
@@ -127,8 +164,28 @@ void keyPressed() {
 **/
 void draw() {
   background(16, 60, 74);
+
+  moverAtual.atualizar();
+  if (moverAtual.getTerminou()) {
+    if (contador < sequencia.size()-1){
+      contador++;
+      moverAtual = sequencia.get(contador);
+      moverAtual.iniciar();
+    }
+  }
+
+  
   scale(50);
   for(int i = 0; i < cubo.length; i++) {  
+    push();
+    if (abs(cubo[i].z) > 0 && cubo[i].z == moverAtual.z){
+      rotateZ(moverAtual.angulo);
+    } else if (abs(cubo[i].y) > 0 && cubo[i].y == moverAtual.y){
+      rotateY(-moverAtual.angulo);
+    } else if (abs(cubo[i].x) > 0 && cubo[i].x == moverAtual.x){
+      rotateX(moverAtual.angulo);
+    }
     cubo[i].show();
+    pop();
   }
 }
