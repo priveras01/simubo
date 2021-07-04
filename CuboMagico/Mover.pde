@@ -6,7 +6,7 @@ class Mover {
  int dir;
  boolean movendo = false;
  boolean terminou = false;
- float velocidade = 0.5;
+ float velocidade = 0.2;
  
  Mover(int x, int y, int z, int dir) {
   this.x = x;

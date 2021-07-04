@@ -20,25 +20,33 @@
 import peasy.*;
 PeasyCam cam;
 
+PFont    axisLabelFont;
+PVector  axisXHud;
+PVector  axisYHud;
+PVector  axisZHud;
+PVector  axisOrgHud;
+
 Mover moverAtual;
 Mover[] movimentos = new Mover[] {
-  new Mover(0, 1, 0, 1),
-  new Mover(0, 1, 0, -1),
-  new Mover(0, -1, 0, 1),
-  new Mover(0, -1, 0, -1),
-  new Mover(1, 0, 0, 1),
-  new Mover(1, 0, 0, -1),
-  new Mover(-1, 0, 0, 1),
-  new Mover(-1, 0, 0, -1),
-  new Mover(0, 0, 1, 1),
-  new Mover(0, 0, 1, -1),
-  new Mover(0, 0, -1, 1),
-  new Mover(0, 0, -1, -1)
+  new Mover(0, 1, 0, 1), //0 baixo horario
+  new Mover(0, 1, 0, -1), //1 baixo anti-horario
+  new Mover(0, -1, 0, 1), //2 cima horário
+  new Mover(0, -1, 0, -1), //3 cima anti-horário
+  new Mover(1, 0, 0, 1), //4 direito horário
+  new Mover(1, 0, 0, -1), //5 direito anti-horário
+  new Mover(-1, 0, 0, 1), //6 esquerda horário
+  new Mover(-1, 0, 0, -1), //7 esquerda anti-horário
+  new Mover(0, 0, 1, 1),  //8 frente horário
+  new Mover(0, 0, 1, -1), //9 frente anti-horário
+  new Mover(0, 0, -1, 1), //10 trás horário
+  new Mover(0, 0, -1, -1) //11 trás anti-horário
 };
 
+Mover[] pilhaDesfazer;
 ArrayList<Mover> sequencia = new ArrayList<Mover>();
 int contador = 0;
-
+boolean resolvendo = false;
+boolean embaralhando = false;
 /**
 *  Instancia o cubo com dimensões 3*3*3
 **/
@@ -62,21 +70,15 @@ void setup() {
     }
   }
   
-  for (int i = 0; i < 25; i++){
-    int a = int(random(movimentos.length));
-    Mover m = movimentos[a];
-    sequencia.add(m);
-  }
+   axisLabelFont = createFont( "Arial", 14 );
+   axisXHud      = new PVector();
+   axisYHud      = new PVector();
+   axisZHud      = new PVector();
+   axisOrgHud    = new PVector();
   
-  moverAtual = sequencia.get(contador);
-  
-  for (int i = sequencia.size()-1; i >= 0; i--){
-    Mover proximoMover = sequencia.get(i).copiar();
-    proximoMover.inverter();
-    sequencia.add(proximoMover);
-  }
-  
+  moverAtual = movimentos[0];  
 }
+
 
 /**
 *  função encarregada de girar um Lado do cubo.
@@ -117,44 +119,82 @@ void keyPressed() {
   switch(key) {
     // minúsculo na ordem horária
     // maiúsculo na ordem anti-horária
-    case ' ': 
+    case ' ': // resolver o cubo de forma automática
+      if (sequencia.size() == 0){ break; }
+      resolvendo = true;
+      contador = sequencia.size()-1;
+      break;
+    case 'r': // aleatorizar
+      contador = sequencia.size(); 
+      aleatorizar(20);
+      embaralhando = true;
+      moverAtual = sequencia.get(contador);
+      moverAtual.iniciar();
+      break;
+    case 'z': // remove o ultimo movimento da lista e executa o movimento (desfazer)
+      if (sequencia.size() == 0){ break; }
+      moverAtual = desfazerMovimento();
       moverAtual.iniciar();
       break;
     case 't': // trás
-      vira('z', -1, -1);
+      moverAtual = movimentos[10];
+      sequencia.add(moverAtual.copiar()); //adiciona na pilha de desfazer  
+      moverAtual.iniciar();
       break;
     case 'T':
-      vira('z', -1, 1);
+      moverAtual = movimentos[11];
+      sequencia.add(moverAtual.copiar()); //adiciona na pilha de desfazer 
+      moverAtual.iniciar();
       break;
     case 'f': // frente
-      vira('z', 1, 1);
+      moverAtual = movimentos[8];
+      sequencia.add(moverAtual.copiar()); //adiciona na pilha de desfazer 
+      moverAtual.iniciar();
       break;
     case 'F':
-      vira('z', 1, -1);
+      moverAtual = movimentos[9];
+      sequencia.add(moverAtual.copiar()); //adiciona na pilha de desfazer 
+      moverAtual.iniciar();
       break;
     case 'b': // baixo
-      vira('y', 1, -1);
+      moverAtual = movimentos[0];
+      sequencia.add(moverAtual.copiar()); //adiciona na pilha de desfazer 
+      moverAtual.iniciar();
       break;
     case 'B':
-      vira('y', 1, 1);
+      moverAtual = movimentos[1];
+      sequencia.add(moverAtual.copiar()); //adiciona na pilha de desfazer 
+      moverAtual.iniciar();
       break;
     case 'c': // cima
-      vira('y', -1, 1);
+      moverAtual = movimentos[2];
+      sequencia.add(moverAtual.copiar()); //adiciona na pilha de desfazer 
+      moverAtual.iniciar();
       break;
     case 'C':
-      vira('y', -1, -1);
+      moverAtual = movimentos[3];
+      sequencia.add(moverAtual.copiar()); //adiciona na pilha de desfazer 
+      moverAtual.iniciar();
       break;
     case 'e': // esquerda
-      vira('x', -1, -1);
+      moverAtual = movimentos[6];
+      sequencia.add(moverAtual.copiar()); //adiciona na pilha de desfazer 
+      moverAtual.iniciar();
       break;
     case 'E':
-      vira('x', -1, 1);
+      moverAtual = movimentos[7];
+      sequencia.add(moverAtual.copiar()); //adiciona na pilha de desfazer 
+      moverAtual.iniciar();
       break;
     case 'd': // direita
-      vira('x', 1, 1);
+      moverAtual = movimentos[4];
+      sequencia.add(moverAtual.copiar()); //adiciona na pilha de desfazer 
+      moverAtual.iniciar();
       break;
     case 'D':
-      vira('x', 1, -1);
+      moverAtual = movimentos[5];
+      sequencia.add(moverAtual.copiar()); //adiciona na pilha de desfazer 
+      moverAtual.iniciar();
       break;
   }
 }
@@ -166,13 +206,36 @@ void draw() {
   background(16, 60, 74);
 
   moverAtual.atualizar();
-  if (moverAtual.getTerminou()) {
+  // Lógica de resolver o cubo automaticamente
+  if (moverAtual.getTerminou() && resolvendo) {
+    if (contador >= 0){
+      moverAtual = sequencia.remove(contador).copiar();
+      moverAtual.inverter();
+      moverAtual.iniciar();
+      contador--;
+    } else {
+      resolvendo = false;
+    }
+  }
+  // fim da resolução
+  
+  // Lógica de emabaralhar o cubo automaticamente
+  if (moverAtual.getTerminou() && embaralhando) {
     if (contador < sequencia.size()-1){
       contador++;
       moverAtual = sequencia.get(contador);
       moverAtual.iniciar();
+    } else {
+      embaralhando = false;
     }
   }
+  // fim da resolução
+  
+   calculateAxis(200);
+
+   cam.beginHUD();
+      drawAxis( 2 );
+   cam.endHUD();
 
   
   scale(50);
@@ -188,4 +251,63 @@ void draw() {
     cubo[i].show();
     pop();
   }
+}
+
+void aleatorizar(int nm){
+  for (int i = 0; i < nm; i++){
+    int a = int(random(movimentos.length));
+    Mover m = movimentos[a];
+    sequencia.add(m.copiar());
+  }
+  
+  //moverAtual = sequencia.get(contador);
+  
+  //for (int i = sequencia.size()-1; i >= 0; i--){
+  //  Mover proximoMover = sequencia.get(i).copiar();
+  //  proximoMover.inverter();
+  //  sequencia.add(proximoMover);
+  //}
+}
+
+Mover desfazerMovimento(){
+  Mover proximoMover = sequencia.remove(sequencia.size()-1).copiar();
+  proximoMover.inverter();
+  return proximoMover;
+}
+
+
+void calculateAxis( float length )
+{
+   // Store the screen positions for the X, Y, Z and origin
+   axisXHud.set( screenX(length,0,0), screenY(length,0,0), 0 );
+   axisYHud.set( screenX(0,length,0), screenY(0,length,0), 0 );
+   axisZHud.set( screenX(0,0,length), screenY(0,0,length), 0 );
+   axisOrgHud.set( screenX(0,0,0), screenY(0,0,0), 0 );
+}
+
+// ------------------------------------------------------------------------ //
+void drawAxis( float weight )
+{
+   pushStyle();   // Store the current style information
+
+     strokeWeight( weight );      // Line width
+
+     stroke( 255,   0,   0 );     // X axis color (Red)
+     line( axisOrgHud.x, axisOrgHud.y, axisXHud.x, axisXHud.y );
+ 
+     stroke(   0, 255,   0 );
+     line( axisOrgHud.x, axisOrgHud.y, axisYHud.x, axisYHud.y );
+
+     stroke(   0,   0, 255 );
+     line( axisOrgHud.x, axisOrgHud.y, axisZHud.x, axisZHud.y );
+
+
+      fill(255);                   // Text color
+      textFont( axisLabelFont );   // Set the text font
+
+      text( "X", axisXHud.x, axisXHud.y );
+      text( "Y", axisYHud.x, axisYHud.y );
+      text( "Z", axisZHud.x, axisZHud.y );
+
+   popStyle();    // Recall the previously stored style information
 }
