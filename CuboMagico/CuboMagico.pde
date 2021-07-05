@@ -20,11 +20,14 @@
 import peasy.*;
 PeasyCam cam;
 
-PFont    axisLabelFont;
-PVector  axisXHud;
-PVector  axisYHud;
-PVector  axisZHud;
-PVector  axisOrgHud;
+PFont    nomeEixo;
+PVector  eixoDireita;
+PVector  eixoEsquerda;
+PVector  eixoFrente;
+PVector  eixoTras;
+PVector  eixoBaixo;
+PVector  eixoCima;
+PVector  origemEixo;
 
 Mover moverAtual;
 Mover[] movimentos = new Mover[] {
@@ -47,6 +50,7 @@ ArrayList<Mover> sequencia = new ArrayList<Mover>();
 int contador = 0;
 boolean resolvendo = false;
 boolean embaralhando = false;
+boolean visualizarEixo = false;
 /**
 *  Instancia o cubo com dimensões 3*3*3
 **/
@@ -70,11 +74,14 @@ void setup() {
     }
   }
   
-   axisLabelFont = createFont( "Arial", 14 );
-   axisXHud      = new PVector();
-   axisYHud      = new PVector();
-   axisZHud      = new PVector();
-   axisOrgHud    = new PVector();
+   nomeEixo = createFont( "Arial", 14 );
+   eixoDireita   = new PVector();
+   eixoFrente    = new PVector();
+   eixoBaixo     = new PVector();
+   eixoEsquerda  = new PVector();
+   eixoTras      = new PVector();
+   eixoCima      = new PVector();
+   origemEixo    = new PVector();
   
   moverAtual = movimentos[0];  
 }
@@ -119,6 +126,9 @@ void keyPressed() {
   switch(key) {
     // minúsculo na ordem horária
     // maiúsculo na ordem anti-horária
+    case 'a': // mostra os eixos
+      visualizarEixo = !visualizarEixo;
+      break;
     case ' ': // resolver o cubo de forma automática
       if (sequencia.size() == 0){ break; }
       resolvendo = true;
@@ -231,12 +241,13 @@ void draw() {
   }
   // fim da resolução
   
-   calculateAxis(200);
+  if (visualizarEixo){
+   calculandoEixo(200);
 
    cam.beginHUD();
-      drawAxis( 2 );
+      desenhoEixo( 2 );
    cam.endHUD();
-
+  }
   
   scale(50);
   for(int i = 0; i < cubo.length; i++) {  
@@ -276,38 +287,49 @@ Mover desfazerMovimento(){
 }
 
 
-void calculateAxis( float length )
-{
-   // Store the screen positions for the X, Y, Z and origin
-   axisXHud.set( screenX(length,0,0), screenY(length,0,0), 0 );
-   axisYHud.set( screenX(0,length,0), screenY(0,length,0), 0 );
-   axisZHud.set( screenX(0,0,length), screenY(0,0,length), 0 );
-   axisOrgHud.set( screenX(0,0,0), screenY(0,0,0), 0 );
+void calculandoEixo( float length ){  
+   eixoDireita.set( screenX(length,0,0), screenY(length,0,0), 0 );
+   eixoEsquerda.set(screenX(-length,0,0), screenY(-length,0,0), 0);
+   eixoFrente.set( screenX(0,0,length), screenY(0,0,length), 0 );
+   eixoTras.set(screenX(0,0,-length), screenY(0,0,-length), 0 );
+   eixoBaixo.set( screenX(0,length,0), screenY(0,length,0), 0 );
+   eixoCima.set(screenX(0,-length,0), screenY(0,-length,0), 0 );
+   origemEixo.set( screenX(0,0,0), screenY(0,0,0), 0 );
 }
 
-// ------------------------------------------------------------------------ //
-void drawAxis( float weight )
-{
-   pushStyle();   // Store the current style information
+void desenhoEixo( float larg ){
+     pushStyle();   
 
-     strokeWeight( weight );      // Line width
+     strokeWeight( larg );      
 
-     stroke( 255,   0,   0 );     // X axis color (Red)
-     line( axisOrgHud.x, axisOrgHud.y, axisXHud.x, axisXHud.y );
+     stroke( 230,   170,   0 );     
+     line( origemEixo.x, origemEixo.y, eixoDireita.x, eixoDireita.y );
+ 
+     stroke( 255,   0,   0 );     
+     line( origemEixo.x, origemEixo.y, eixoEsquerda.x, eixoEsquerda.y );
  
      stroke(   0, 255,   0 );
-     line( axisOrgHud.x, axisOrgHud.y, axisYHud.x, axisYHud.y );
+     line( origemEixo.x, origemEixo.y, eixoFrente.x, eixoFrente.y );
+     
+     stroke(   0, 0,  255 );
+     line( origemEixo.x, origemEixo.y, eixoTras.x, eixoTras.y );
 
-     stroke(   0,   0, 255 );
-     line( axisOrgHud.x, axisOrgHud.y, axisZHud.x, axisZHud.y );
+     stroke(   255,   255, 255 );
+     line( origemEixo.x, origemEixo.y, eixoBaixo.x, eixoBaixo.y );
+     
+     stroke(   230, 230,   0 );
+     line( origemEixo.x, origemEixo.y, eixoCima.x, eixoCima.y );
 
 
-      fill(255);                   // Text color
-      textFont( axisLabelFont );   // Set the text font
+      fill(255);                   
+      textFont( nomeEixo );   
 
-      text( "X", axisXHud.x, axisXHud.y );
-      text( "Y", axisYHud.x, axisYHud.y );
-      text( "Z", axisZHud.x, axisZHud.y );
+      text( "D", eixoDireita.x, eixoDireita.y );
+      text( "E", eixoEsquerda.x, eixoEsquerda.y );
+      text( "F", eixoFrente.x, eixoFrente.y );
+      text( "T", eixoTras.x, eixoTras.y );
+      text( "B", eixoBaixo.x, eixoBaixo.y );
+      text( "C", eixoCima.x, eixoCima.y );
 
-   popStyle();    // Recall the previously stored style information
+   popStyle();    
 }
