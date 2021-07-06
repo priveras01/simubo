@@ -29,6 +29,19 @@ PVector  eixoBaixo;
 PVector  eixoCima;
 PVector  origemEixo;
 
+int larguraDoBotao = 150;
+
+
+Botao[] botoes = new Botao[]{
+  new Botao(0,0, "Mostrar Eixos"),
+  new Botao(larguraDoBotao,0, "Embaralhar"),
+  new Botao(larguraDoBotao*2,0, "Resolver"),
+  new Botao(larguraDoBotao*3,0, "Embaralhar"),
+  new Botao(larguraDoBotao*4,0, "Embaralhar"),
+  new Botao(larguraDoBotao*5,0, "Reset"),
+  
+};
+
 Mover moverAtual;
 Mover[] movimentos = new Mover[] {
   new Mover(0, 1, 0, 1), //0 baixo horario
@@ -58,9 +71,14 @@ Caixa[] cubo = new Caixa[3*3*3];
 void setup() {
   // frameRate para que funcione em todos os computadores
   frameRate(40);
-  size(600, 600, P3D);
+  size(900, 900, P3D);
   //Instancia a camera
   cam = new PeasyCam(this, 400);
+  
+  for (int i = 0; i < botoes.length; i++){
+    botoes[i].setupBotao();
+  }
+  
   int index = 0;
   for(int x = -1; x <= 1 ; x++) {
     for(int y = -1; y <= 1; y++) {
@@ -249,6 +267,12 @@ void draw() {
    cam.endHUD();
   }
   
+   cam.beginHUD();
+      for (int i = 0; i < botoes.length; i++){
+        botoes[i].desenharBotao();
+      }
+   cam.endHUD();
+  
   scale(50);
   for(int i = 0; i < cubo.length; i++) {  
     push();
@@ -332,4 +356,29 @@ void desenhoEixo( float larg ){
       text( "C", eixoCima.x, eixoCima.y );
 
    popStyle();    
+}
+
+void mousePressed(){
+  if (botoes[0].rectOver) {
+    visualizarEixo = !visualizarEixo;
+  }
+  if (botoes[1].rectOver) {
+    contador = sequencia.size(); 
+    aleatorizar(20);
+    embaralhando = true;
+    moverAtual = sequencia.get(contador);
+    moverAtual.iniciar();
+  }
+  if(botoes[2].rectOver){
+    if (sequencia.size() != 0){ 
+      resolvendo = true;
+      contador = sequencia.size()-1;
+    }
+  }
+  if(botoes[3].rectOver){
+  }
+  if(botoes[4].rectOver){
+  }
+  if(botoes[5].rectOver){
+  }
 }
