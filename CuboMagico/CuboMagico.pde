@@ -36,10 +36,22 @@ Botao[] botoes = new Botao[]{
   new Botao(0,0, "Mostrar Eixos"),
   new Botao(larguraDoBotao,0, "Embaralhar"),
   new Botao(larguraDoBotao*2,0, "Resolver"),
-  new Botao(larguraDoBotao*3,0, "Embaralhar"),
-  new Botao(larguraDoBotao*4,0, "Embaralhar"),
-  new Botao(larguraDoBotao*5,0, "Reset"),
-  
+  new Botao(larguraDoBotao*3,0, "Desfazer"), 
+};
+
+BotaoInferior[] botoesInferiores = new BotaoInferior[]{
+  new BotaoInferior(0,850, "F"),
+  new BotaoInferior(50,850, "F'"),
+  new BotaoInferior(100,850, "T"),
+  new BotaoInferior(150,850, "T'"),
+  new BotaoInferior(200,850, "C"),
+  new BotaoInferior(250,850, "C'"),
+  new BotaoInferior(300,850, "B"),
+  new BotaoInferior(350,850, "B'"),
+  new BotaoInferior(400,850, "D"),
+  new BotaoInferior(450,850, "D'"),
+  new BotaoInferior(500,850, "E"),
+  new BotaoInferior(550,850, "E'")
 };
 
 Mover moverAtual;
@@ -77,6 +89,9 @@ void setup() {
   
   for (int i = 0; i < botoes.length; i++){
     botoes[i].setupBotao();
+  }
+  for (int i = 0; i < botoesInferiores.length; i++){
+    botoesInferiores[i].setupBotao();
   }
   
   int index = 0;
@@ -271,6 +286,9 @@ void draw() {
       for (int i = 0; i < botoes.length; i++){
         botoes[i].desenharBotao();
       }
+      for (int i = 0; i < botoesInferiores.length; i++){
+        botoesInferiores[i].desenharBotao();
+      }
    cam.endHUD();
   
   scale(50);
@@ -359,26 +377,96 @@ void desenhoEixo( float larg ){
 }
 
 void mousePressed(){
-  if (botoes[0].rectOver) {
+  if (botoes[0].rectOver) { // Mostrar Eixos
     visualizarEixo = !visualizarEixo;
+    if (botoes[0].texto == "Mostrar Eixos") {
+      botoes[0].texto = "Ocultar Eixos";
+    } else {
+      botoes[0].texto = "Mostrar Eixos";
+    }
   }
-  if (botoes[1].rectOver) {
+  if (botoes[1].rectOver) { //Embaralhar
     contador = sequencia.size(); 
     aleatorizar(20);
     embaralhando = true;
     moverAtual = sequencia.get(contador);
     moverAtual.iniciar();
   }
-  if(botoes[2].rectOver){
+  if(botoes[2].rectOver){ //Resolver
     if (sequencia.size() != 0){ 
       resolvendo = true;
       contador = sequencia.size()-1;
     }
   }
-  if(botoes[3].rectOver){
+  if(botoes[3].rectOver){ //Desfazer
+    if (sequencia.size() != 0){ 
+      moverAtual = desfazerMovimento();
+      moverAtual.iniciar();
+    }
   }
-  if(botoes[4].rectOver){
+  
+  
+  if (botoesInferiores[0].rectOver) { // F
+    moverAtual = movimentos[8];
+    sequencia.add(moverAtual.copiar()); //adiciona na pilha de desfazer 
+    moverAtual.iniciar();
   }
-  if(botoes[5].rectOver){
+  if (botoesInferiores[1].rectOver) { // F'
+    moverAtual = movimentos[9];
+    sequencia.add(moverAtual.copiar()); //adiciona na pilha de desfazer 
+    moverAtual.iniciar();
   }
+  if (botoesInferiores[2].rectOver) { // T
+    moverAtual = movimentos[10];
+    sequencia.add(moverAtual.copiar()); //adiciona na pilha de desfazer 
+    moverAtual.iniciar();
+  }
+  if (botoesInferiores[3].rectOver) { // T'
+    moverAtual = movimentos[11];
+    sequencia.add(moverAtual.copiar()); //adiciona na pilha de desfazer 
+    moverAtual.iniciar();
+  }
+  if (botoesInferiores[4].rectOver) { // C
+    moverAtual = movimentos[2];
+    sequencia.add(moverAtual.copiar()); //adiciona na pilha de desfazer 
+    moverAtual.iniciar();
+  }
+  if (botoesInferiores[5].rectOver) { // C'
+    moverAtual = movimentos[3];
+    sequencia.add(moverAtual.copiar()); //adiciona na pilha de desfazer 
+    moverAtual.iniciar();
+  }
+  
+  if (botoesInferiores[6].rectOver) { // B
+    moverAtual = movimentos[0];
+    sequencia.add(moverAtual.copiar()); //adiciona na pilha de desfazer 
+    moverAtual.iniciar();
+  }
+  if (botoesInferiores[7].rectOver) { // B'
+    moverAtual = movimentos[1];
+    sequencia.add(moverAtual.copiar()); //adiciona na pilha de desfazer 
+    moverAtual.iniciar();
+  }
+  if (botoesInferiores[8].rectOver) { // D
+    moverAtual = movimentos[4];
+    sequencia.add(moverAtual.copiar()); //adiciona na pilha de desfazer 
+    moverAtual.iniciar();
+  }
+  if (botoesInferiores[9].rectOver) { // D'
+    moverAtual = movimentos[5];
+    sequencia.add(moverAtual.copiar()); //adiciona na pilha de desfazer 
+    moverAtual.iniciar();
+  }
+  if (botoesInferiores[10].rectOver) { // E
+    moverAtual = movimentos[6];
+    sequencia.add(moverAtual.copiar()); //adiciona na pilha de desfazer 
+    moverAtual.iniciar();
+  }
+  if (botoesInferiores[11].rectOver) { // E'
+    moverAtual = movimentos[7];
+    sequencia.add(moverAtual.copiar()); //adiciona na pilha de desfazer 
+    moverAtual.iniciar();
+  }
+  
+  
 }
